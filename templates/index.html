@@ -1,0 +1,596 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prototype3_JD — ABLBL Job Description Agent</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-dark: #070e17;
+            --bg-card: rgba(13, 25, 41, 0.65);
+            --primary: #4581B5;
+            --primary-glow: rgba(69, 129, 181, 0.15);
+            --accent-orange: #f97316;
+            --accent-red: #dc2626;
+            --text-main: #f8f9fa;
+            --text-muted: #94a3b8;
+            --border-glow: rgba(255, 255, 255, 0.08);
+        }
+        
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+        }
+        
+        body {
+            background: radial-gradient(circle at 10% 20%, rgba(220, 38, 38, 0.08) 0%, transparent 40%),
+                        radial-gradient(circle at 90% 80%, rgba(249, 115, 22, 0.08) 0%, transparent 40%),
+                        linear-gradient(135deg, #070d14 0%, #0d1929 100%);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: space-between;
+            padding: 2.5rem 1rem;
+            overflow-x: hidden;
+        }
+
+        .header-wrapper {
+            text-align: center;
+            margin-bottom: 2rem;
+            width: 100%;
+            max-width: 800px;
+        }
+
+        .agent-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: rgba(249, 115, 22, 0.1);
+            border: 1px solid rgba(249, 115, 22, 0.2);
+            color: #fdba74;
+            padding: 0.5rem 1.25rem;
+            border-radius: 9999px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 1.5rem;
+            animation: pulse-orange 2s infinite alternate;
+        }
+
+        @keyframes pulse-orange {
+            0% { box-shadow: 0 0 0 0 rgba(249, 115, 22, 0.2); }
+            100% { box-shadow: 0 0 12px 4px rgba(249, 115, 22, 0.4); }
+        }
+
+        h1 {
+            font-family: 'Outfit', sans-serif;
+            font-size: 3rem;
+            font-weight: 700;
+            margin-bottom: 0.75rem;
+            letter-spacing: -0.02em;
+            background: linear-gradient(135deg, #ffffff 40%, #ffedd5 60%, #fdba74 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        p.subtitle {
+            color: var(--text-muted);
+            font-size: 1.15rem;
+            max-width: 600px;
+            margin: 0 auto;
+            line-height: 1.6;
+        }
+
+        .main-container {
+            display: flex;
+            justify-content: center;
+            width: 100%;
+            max-width: 750px;
+            margin: 0 auto;
+        }
+
+        .glass-card {
+            background: var(--bg-card);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid var(--border-glow);
+            border-radius: 24px;
+            padding: 2.5rem;
+            box-shadow: 0 30px 60px -15px rgba(0, 0, 0, 0.6);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .glass-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, var(--accent-red), var(--accent-orange), var(--primary));
+        }
+
+        .upload-area {
+            border: 2px dashed rgba(255, 255, 255, 0.12);
+            border-radius: 16px;
+            padding: 3rem 2rem;
+            margin-bottom: 2rem;
+            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+            cursor: pointer;
+            position: relative;
+            background: rgba(255, 255, 255, 0.01);
+            text-align: center;
+        }
+
+        .upload-area:hover, .upload-area.dragover {
+            border-color: var(--primary);
+            background: rgba(69, 129, 181, 0.05);
+            box-shadow: 0 0 30px var(--primary-glow);
+            transform: scale(1.01);
+        }
+
+        .upload-icon {
+            font-size: 3.5rem;
+            margin-bottom: 1.25rem;
+            display: inline-block;
+            transition: transform 0.3s ease;
+        }
+
+        .upload-area:hover .upload-icon {
+            transform: translateY(-5px);
+        }
+
+        .upload-area h3 {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        input[type="file"] {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            opacity: 0;
+            cursor: pointer;
+        }
+
+        .btn-submit {
+            background: linear-gradient(135deg, var(--accent-red) 0%, var(--accent-orange) 50%, var(--primary) 100%);
+            background-size: 200% auto;
+            color: white;
+            border: none;
+            padding: 1.1rem 2rem;
+            font-size: 1.1rem;
+            font-weight: 700;
+            border-radius: 12px;
+            cursor: pointer;
+            width: 100%;
+            transition: all 0.4s ease;
+            box-shadow: 0 4px 20px rgba(249, 115, 22, 0.2);
+        }
+
+        .btn-submit:hover {
+            background-position: right center;
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(249, 115, 22, 0.4);
+        }
+        
+        .btn-submit:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .info-panel {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .rules-card {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 20px;
+            padding: 1.75rem;
+        }
+
+        .rules-card h4 {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 1.25rem;
+            color: #fdba74;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .rule-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 0.75rem;
+            margin-bottom: 1rem;
+            font-size: 0.925rem;
+            line-height: 1.5;
+        }
+
+        .rule-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .rule-icon {
+            color: var(--accent-orange);
+            font-weight: bold;
+            font-size: 1.1rem;
+            line-height: 1;
+        }
+
+        .rule-label {
+            color: var(--text-muted);
+            font-weight: 500;
+        }
+
+        .rule-value {
+            color: var(--text-main);
+            font-weight: 600;
+        }
+
+        .file-list {
+            text-align: left;
+            margin-top: 1.25rem;
+            max-height: 150px;
+            overflow-y: auto;
+        }
+        
+        .file-item {
+            background: rgba(255, 255, 255, 0.04);
+            padding: 0.75rem 1rem;
+            border-radius: 8px;
+            margin-bottom: 0.5rem;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border: 1px solid rgba(255, 255, 255, 0.03);
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(5px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .file-name {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .loader {
+            display: none;
+            margin: 1.5rem auto 0 auto;
+            border: 3px solid rgba(255, 255, 255, 0.05);
+            border-top: 3px solid var(--accent-orange);
+            border-radius: 50%;
+            width: 44px;
+            height: 44px;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .error-message {
+            color: #ef4444;
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid rgba(239, 68, 68, 0.2);
+            padding: 1rem;
+            border-radius: 12px;
+            margin-top: 1.5rem;
+            display: none;
+            font-size: 0.95rem;
+            line-height: 1.4;
+            text-align: left;
+        }
+
+        footer {
+            width: 100%;
+            max-width: 1100px;
+            margin-top: 4rem;
+            padding-top: 2rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
+        .footer-links {
+            display: flex;
+            gap: 1.5rem;
+            align-items: center;
+        }
+
+        .footer-link {
+            color: var(--text-muted);
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: color 0.3s ease;
+            font-weight: 500;
+        }
+
+        .footer-link:hover {
+            color: var(--text-main);
+        }
+
+        .footer-link svg {
+            width: 18px;
+            height: 18px;
+            fill: currentColor;
+        }
+
+        @media (max-width: 900px) {
+            body {
+                padding: 1.5rem;
+            }
+            h1 {
+                font-size: 2.25rem;
+            }
+        }
+        
+        .settings-toggle {
+            position: absolute;
+            top: 1.5rem;
+            right: 1.5rem;
+            font-size: 1.35rem;
+            cursor: pointer;
+            z-index: 10;
+            transition: transform 0.4s ease, opacity 0.3s ease;
+            opacity: 0.5;
+        }
+        .settings-toggle:hover {
+            transform: rotate(45deg);
+            opacity: 1;
+        }
+        .settings-panel {
+            background: rgba(0, 0, 0, 0.4);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            padding: 1.25rem;
+            margin-bottom: 1.5rem;
+            display: none;
+            text-align: left;
+            animation: slideDown 0.3s ease;
+        }
+        @keyframes slideDown {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+
+</head>
+<body>
+
+    <div class="header-wrapper">
+        <div class="agent-badge">
+            <span style="display:inline-block; width:8px; height:8px; border-radius:50%; background:#22c55e; animation: blink 1s infinite alternate;"></span>
+            Agent: ABLBL JD Transformer AI Agent
+        </div>
+        <h1>ABLBL JD Transformer AI Agent</h1>
+        <p class="subtitle">AI-powered transformation of legacy JDs into the official ABLBL Role Playbook format. Completely identical, full-bleed design layouts in seconds.</p>
+    </div>
+
+    <div class="main-container">
+        
+        <div class="glass-card">
+            <!-- Settings panel toggle -->
+            <div class="settings-toggle" onclick="toggleSettings()" title="Settings">⚙️</div>
+            
+            <!-- Settings Panel -->
+            <div class="settings-panel" id="settingsPanel">
+                <label for="apiKeyInput" style="display:block; font-size:0.85rem; font-weight:600; margin-bottom:0.5rem; color:#fdba74;">Groq API Key (Optional Override):</label>
+                <div style="display: flex; gap: 0.5rem;">
+                    <input type="password" id="apiKeyInput" placeholder="Enter your gsk_... key" style="flex: 1; padding:0.6rem 0.8rem; border-radius:8px; border:1px solid rgba(255,255,255,0.1); background:rgba(0,0,0,0.2); color:#fff; font-size:0.9rem;">
+                    <button type="button" onclick="resetApiKey()" style="background: rgba(239, 68, 68, 0.2); border: 1px solid rgba(239, 68, 68, 0.4); color: #fca5a5; padding: 0.6rem 1rem; border-radius: 8px; font-size: 0.85rem; font-weight: 600; cursor: pointer; transition: all 0.3s ease; white-space: nowrap;">Reset Default</button>
+                </div>
+                <p style="font-size:0.75rem; color:var(--text-muted); line-height:1.4; margin-top:0.5rem;">Leave empty to use the system default. Saved locally in your browser.</p>
+            </div>
+
+
+            <form id="uploadForm" enctype="multipart/form-data">
+
+                
+                <div class="upload-area" id="dropArea">
+                    <span class="upload-icon">✨</span>
+                    <h3>Drag & Drop Legacy JDs</h3>
+                    <p style="color: var(--text-muted); margin-top: 0.5rem; font-size: 0.9rem;">Supports PDF, DOCX, DOC, and TXT files</p>
+                    <input type="file" id="fileInput" name="files" multiple accept=".pdf,.doc,.docx,.txt">
+                </div>
+
+                <div class="file-list" id="fileList"></div>
+
+                <button type="submit" class="btn-submit" id="submitBtn">Generate Playbooks 🚀</button>
+                <div class="loader" id="loader"></div>
+                <div class="error-message" id="errorMessage"></div>
+            </form>
+        </div>
+
+    </div>
+
+    <footer>
+        <div>ABLBL JD Transformer AI Agent • ABLBL Limited</div>
+        <div class="footer-links">
+            <a href="https://www.ablbl.in/" target="_blank" class="footer-link">
+                <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/></svg>
+                Website
+            </a>
+            <a href="https://www.linkedin.com/company/aditya-birla-lifestyle-brands-limited/posts/?feedView=all" target="_blank" class="footer-link">
+                <svg viewBox="0 0 24 24"><path d="M19 3a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2zm-.5 15.5v-5.3a3.26 3.26 0 0 0-3.26-3.26c-.85 0-1.84.52-2.32 1.3v-1.11h-2.79v8.37h2.79v-4.93c0-.77.62-1.4 1.39-1.4a1.4 1.4 0 0 1 1.4 1.4v4.93zM6.88 8.56a1.68 1.68 0 0 0 1.68-1.68c0-.93-.75-1.69-1.68-1.69a1.69 1.69 0 0 0-1.69 1.69c0 .93.76 1.68 1.69 1.68m1.39 9.94v-8.37H5.5v8.37z"/></svg>
+                LinkedIn
+            </a>
+        </div>
+    </footer>
+
+    <script>
+        // Toggle Settings Panel
+        function toggleSettings() {
+            const panel = document.getElementById('settingsPanel');
+            panel.style.display = panel.style.display === 'block' ? 'none' : 'block';
+        }
+
+        // Load & Save API Key from/to localStorage
+        document.addEventListener('DOMContentLoaded', () => {
+            let savedKey = localStorage.getItem('ablbl_groq_api_key');
+            const badKeys = [
+                'gsk_OLD_EXPIRED_KEY_PLACEHOLDER_1',
+                'gsk_OLD_EXPIRED_KEY_PLACEHOLDER_2'
+            ];
+            if (badKeys.includes(savedKey)) {
+                localStorage.removeItem('ablbl_groq_api_key');
+                savedKey = null;
+            }
+            if (savedKey) {
+                document.getElementById('apiKeyInput').value = savedKey;
+            }
+        });
+
+
+
+        // Reset/Clear API Key
+        function resetApiKey() {
+            document.getElementById('apiKeyInput').value = '';
+            localStorage.removeItem('ablbl_groq_api_key');
+            alert('API Key cleared! The application will now use the default system key.');
+        }
+
+        document.getElementById('apiKeyInput').addEventListener('input', (e) => {
+            localStorage.setItem('ablbl_groq_api_key', e.target.value.trim());
+        });
+
+
+        const dropArea = document.getElementById('dropArea');
+        const fileInput = document.getElementById('fileInput');
+        const fileList = document.getElementById('fileList');
+        const uploadForm = document.getElementById('uploadForm');
+        const submitBtn = document.getElementById('submitBtn');
+        const loader = document.getElementById('loader');
+        const errorMessage = document.getElementById('errorMessage');
+
+
+        // Handle File Selection
+        fileInput.addEventListener('change', updateFileList);
+        
+        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+            dropArea.addEventListener(eventName, preventDefaults, false);
+        });
+
+        function preventDefaults(e) {
+            e.preventDefault();
+            e.stopPropagation();
+        }
+
+        ['dragenter', 'dragover'].forEach(eventName => {
+            dropArea.addEventListener(eventName, () => dropArea.classList.add('dragover'), false);
+        });
+
+        ['dragleave', 'drop'].forEach(eventName => {
+            dropArea.addEventListener(eventName, () => dropArea.classList.remove('dragover'), false);
+        });
+
+        dropArea.addEventListener('drop', (e) => {
+            let dt = e.dataTransfer;
+            let files = dt.files;
+            fileInput.files = files;
+            updateFileList();
+        });
+
+        function updateFileList() {
+            fileList.innerHTML = '';
+            Array.from(fileInput.files).forEach(file => {
+                const item = document.createElement('div');
+                item.className = 'file-item';
+                
+                const nameSpan = document.createElement('span');
+                nameSpan.className = 'file-name';
+                nameSpan.innerHTML = `📄 <strong>${file.name}</strong> (${(file.size / 1024).toFixed(1)} KB)`;
+                
+                item.appendChild(nameSpan);
+                fileList.appendChild(item);
+            });
+        }
+
+        uploadForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            if (fileInput.files.length === 0) {
+                showError("Please select at least one legacy JD file to upload.");
+                return;
+            }
+
+            const formData = new FormData(uploadForm);
+            const apiKey = document.getElementById('apiKeyInput').value.trim();
+            if (apiKey) {
+                formData.append('api_key', apiKey);
+            }
+
+            
+            submitBtn.style.display = 'none';
+            loader.style.display = 'block';
+            errorMessage.style.display = 'none';
+
+            try {
+                const response = await fetch('/process', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                if (response.ok) {
+                    const blob = await response.blob();
+                    const contentDisposition = response.headers.get('Content-Disposition');
+                    let filename = "ABLBL_Role_Playbooks.zip";
+                    if (contentDisposition) {
+                        const match = contentDisposition.match(/filename="?([^"]+)"?/);
+                        if (match) filename = match[1];
+                    }
+                    
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.style.display = 'none';
+                    a.href = url;
+                    a.download = filename;
+                    document.body.appendChild(a);
+                    a.click();
+                    window.URL.revokeObjectURL(url);
+                } else {
+                    const data = await response.json();
+                    showError(data.error || "An error occurred during playbook processing.");
+                }
+            } catch (err) {
+                showError("Network error occurred while communicating with Prototype3_JD agent.");
+            } finally {
+                submitBtn.style.display = 'block';
+                loader.style.display = 'none';
+            }
+        });
+
+        function showError(msg) {
+            errorMessage.textContent = msg;
+            errorMessage.style.display = 'block';
+        }
+    </script>
+</body>
+</html>

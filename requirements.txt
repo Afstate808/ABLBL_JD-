@@ -1,0 +1,9 @@
+Flask
+werkzeug
+groq
+pdfplumber
+python-docx
+Pillow
+mammoth
+docx2pdf
+streamlit
